@@ -199,9 +199,26 @@
     }
     @media (max-width: 560px) {
       .how-to, .report-grid { grid-template-columns: 1fr; }
+      body {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        min-height: 0;
+        overflow: hidden;
+        background: #160d21;
+      }
+      #game-container {
+        width: 100vw;
+        height: 100vh;
+        aspect-ratio: auto;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
       #control-tip { display: none; }
       #touch-controls { bottom: 12px; }
       .ui-card { padding: 6px 8px; }
+      #pipeline-ledger { display: none !important; }
     }
   </style>
 </head>

@@ -24,9 +24,11 @@
     .biz{border:1px solid #d8eadf;border-radius:8px;padding:8px;margin-bottom:7px;background:#fbfefc}.biz.locked{opacity:.62}.biz-title{font-weight:900}.cost{font-size:12px;margin:5px 0;display:flex;gap:4px;flex-wrap:wrap}.missing{color:#e53e3e;font-weight:900}.ready{box-shadow:0 0 0 2px #ffd95b inset}.check{font-size:12px;line-height:1.45}
     footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:7px 10px;background:#f0faf4;border-top:2px solid #d8eadf;font-size:12px}
     .touch{display:flex;gap:6px;flex-wrap:wrap}.touch button{min-width:42px}
+    .mobile-aim-pad{display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:15;grid-template-columns:64px 82px 64px;gap:8px;align-items:center;background:rgba(16,41,27,.88);border:2px solid #ffd95b;border-radius:14px;padding:8px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+    .mobile-aim-pad button{height:54px;border-radius:12px;font-size:22px}.mobile-aim-pad .fire{font-size:16px;background:#38a169;color:#fff}
     .overlay{position:absolute;inset:0;background:rgba(10,29,19,.93);z-index:20;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}.overlay-card{width:min(720px,96%);max-height:96%;overflow:auto;background:#10291b;border:2px solid #ffd95b;border-radius:14px;padding:22px}.overlay h2{color:#ffd95b;margin:0 0 10px}.overlay p{line-height:1.65;word-break:keep-all}.start-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.report{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;text-align:left;margin:12px 0}.report div{background:rgba(255,255,255,.08);border-radius:8px;padding:8px}
     input[type=file]{display:none}
-    @media(max-width:880px){.app{height:100vh;border:0;border-radius:0}.main{grid-template-columns:1fr;grid-template-rows:auto auto auto;overflow:auto}.panel,.right{border:0;border-bottom:2px solid #d8eadf;max-height:210px}.value-grid,.special-grid{grid-template-columns:repeat(3,1fr)}.report{grid-template-columns:1fr}}
+    @media(max-width:880px){.app{height:100vh;border:0;border-radius:0}.main{grid-template-columns:1fr;grid-template-rows:1fr;overflow:hidden}.panel,.right{display:none}.canvas-wrap{padding:4px 4px 78px;align-items:center}canvas{width:100%;max-height:100%;object-fit:contain}.value-grid,.special-grid{grid-template-columns:repeat(3,1fr)}.report{grid-template-columns:1fr}footer{display:none}.mobile-aim-pad{display:grid}}
   </style>
 </head>
 <body>
@@ -46,10 +48,10 @@
     <aside class="panel">
       <div class="card"><h3>자원 보관함</h3><div id="resources" class="resource-bar"></div><div class="status" id="last-save">마지막 저장: 없음</div></div>
       <div class="card"><h3>조준</h3><div class="role">A / ←, D / →</div><div class="status">방향을 바꾸면 다음 발사가 준비됩니다.</div><div class="status" id="p1-state"></div></div>
-      <div class="card"><h3>현재·다음 버블</h3><div class="role">버블은 무작위로 준비됩니다. Enter / Space 발사</div><div id="value-buttons" class="value-grid"></div></div>
+      <div class="card"><h3>현재·다음 버블</h3><div class="role">버블은 무작위로 준비됩니다. 발사 버튼 또는 터치 발사</div><div id="value-buttons" class="value-grid"></div></div>
       <div class="card"><h3>특수 버블</h3><div id="special-buttons" class="special-grid"></div></div>
     </aside>
-    <section class="canvas-wrap"><canvas id="game" width="720" height="560"></canvas><div id="message" class="message"></div></section>
+    <section class="canvas-wrap"><canvas id="game" width="720" height="560"></canvas><div id="message" class="message"></div><div class="mobile-aim-pad"><button id="m-left">◀</button><button id="m-fire" class="fire">발사</button><button id="m-right">▶</button></div></section>
     <aside class="panel right">
       <div class="card"><h3>사회적경제기업 건설</h3><div id="business-list"></div></div>
       <div class="card"><h3>상생복합센터</h3><div id="final-card"></div></div>
@@ -57,7 +59,7 @@
     </aside>
   </div>
   <footer>
-    <div>A/D 또는 방향키로 조준하고 Enter/Space로 발사합니다. 최종 센터는 H를 1.5초 눌러 건설합니다.</div>
+    <div>A/D 또는 방향키로 조준하고 Enter/Space로 발사합니다. 휴대폰은 화면을 눌러 조준하고 손을 떼면 발사합니다.</div>
     <div class="touch">
       <button id="t-left">◀</button><button id="t-right">▶</button>
       <button id="t-fire" class="ok">발사</button>
@@ -118,6 +120,17 @@ function spawn(){if(grid.length&&grid.every(row=>row.every(cell=>!cell))){stage+
 function weightedType(){let pool=VALUE_KEYS.slice();VALUE_KEYS.forEach(k=>{if(resources[k]<3)pool.push(k,k)});return pool[Math.floor(Math.random()*pool.length)]}
 function setSelected(type){selected=type;if(current&&!current.moving)current.type=type;updateUI();}
 function moveAim(delta){angle=Math.max(-1.15,Math.min(1.15,angle+delta));aimMoved=true;updateReady();}
+function aimAtCanvasPoint(clientX,clientY){
+  const rect=canvas.getBoundingClientRect();
+  const x=(clientX-rect.left)*canvas.width/rect.width;
+  const y=(clientY-rect.top)*canvas.height/rect.height;
+  const dx=x-SHOOTX;
+  const dy=SHOOTY-y;
+  if(dy<=20)return;
+  angle=Math.max(-1.15,Math.min(1.15,Math.atan2(dx,dy)));
+  aimMoved=true;
+  updateReady();
+}
 function fire(){if(gamePaused||!current||current.moving)return;current.vx=Math.sin(angle)*11.5;current.vy=-Math.cos(angle)*11.5;current.moving=true;showMsg(`${VALUE_TYPES[current.type].icon} ${VALUE_TYPES[current.type].name} 발사!`);playSfx(520,.08,'triangle');}
 function update(){if(gamePaused)return;if(messageTimer>0&&--messageTimer<=0)document.getElementById('message').style.display='none';updateParticles();checkFinalHold();if(current&&current.moving){current.x+=current.vx;current.y+=current.vy;if(current.x<R){current.x=R;current.vx*=-1;playSfx(270,.04,'square')}if(current.x>canvas.width-R){current.x=canvas.width-R;current.vx*=-1;playSfx(270,.04,'square')}if(current.y<R){snap(current);return}for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let b=grid[r][c];if(b&&Math.hypot(current.x-b.x,current.y-b.y)<R*1.72){snap(current);return}}}}
 function addPressureRow(){for(let r=ROWS-1;r>0;r--)grid[r]=grid[r-1];grid[0]=Array.from({length:COLS},()=>new Bubble(0,0,VALUE_KEYS[Math.floor(Math.random()*VALUE_KEYS.length)]));updateGrid();showMsg('⚠ 실패 5회! 새 버블 줄이 내려옵니다.')}
@@ -187,6 +200,12 @@ document.getElementById('clear-save-btn').onclick=()=>{if(confirm('상생마을�
 document.getElementById('restart').onclick=()=>{document.getElementById('end').style.display='none';gamePaused=false;saveGame()};
 document.getElementById('music-btn').onclick=toggleMusic;document.getElementById('export-btn').onclick=exportSave;document.getElementById('import-btn').onclick=()=>document.getElementById('import-file').click();document.getElementById('import-file').onchange=e=>e.target.files[0]&&importSave(e.target.files[0]);
 document.getElementById('t-left').onclick=()=>moveAim(-.12);document.getElementById('t-right').onclick=()=>moveAim(.12);document.getElementById('t-fire').onclick=fire;document.querySelectorAll('[data-touch-value]').forEach(b=>b.onclick=()=>setSelected(b.dataset.touchValue));
+document.getElementById('m-left').onclick=()=>moveAim(-.16);document.getElementById('m-right').onclick=()=>moveAim(.16);document.getElementById('m-fire').onclick=fire;
+let touchAiming=false;
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;touchAiming=true;canvas.setPointerCapture(e.pointerId);aimAtCanvasPoint(e.clientX,e.clientY);e.preventDefault();},{passive:false});
+canvas.addEventListener('pointermove',e=>{if(!touchAiming||e.pointerType==='mouse')return;aimAtCanvasPoint(e.clientX,e.clientY);e.preventDefault();},{passive:false});
+canvas.addEventListener('pointerup',e=>{if(!touchAiming||e.pointerType==='mouse')return;aimAtCanvasPoint(e.clientX,e.clientY);touchAiming=false;fire();e.preventDefault();},{passive:false});
+canvas.addEventListener('pointercancel',()=>{touchAiming=false});
 function loop(){update();draw();requestAnimationFrame(loop)}
 const startInfo=document.querySelector('#start p');if(startInfo)startInfo.innerHTML='일반 버블 슈터처럼 같은 색 버블 3개 이상을 연결해 제거하세요.<br>발사 횟수 제한과 정답 순서는 없습니다. 제거 실패가 5번 누적되면 새 줄이 내려옵니다.<br>A/D 또는 방향키 조준 · Enter/Space 발사';blankState();initGrid();spawn();updateUI();renderPipeline();loop();
 </script>

@@ -227,6 +227,52 @@
             border-radius: 3px;
             font-size: 10px;
         }
+        @media (max-width: 620px) {
+            body {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+                min-height: 0;
+                overflow: hidden;
+                background: #020617;
+            }
+            h1, p.subtitle, .tip {
+                display: none;
+            }
+            #arcade-cabinet {
+                width: 100vw;
+                height: 100vh;
+                display: block;
+                padding: 0;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+                background: #020617;
+            }
+            #screen-area {
+                width: 100vw;
+                height: 100vh;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            #side-panel {
+                display: none;
+            }
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+            #pipeline-ledger {
+                display: none !important;
+            }
+            .screen-overlay {
+                padding: 18px;
+            }
+            .difficulty-btn {
+                width: min(260px, 88vw);
+            }
+        }
     </style>
 </head>
 <body>
