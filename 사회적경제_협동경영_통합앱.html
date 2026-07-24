@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>사회적경제 협동경영 통합앱</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;height:100vh;overflow:hidden;font-family:"Malgun Gothic",system-ui,sans-serif;background:#10291b;color:#fff}
+.app{height:100%;display:grid;grid-template-rows:auto auto 1fr}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 16px;background:linear-gradient(100deg,#17643a,#299552);border-bottom:3px solid #ffd75e}
+.brand h1{font-size:clamp(18px,3vw,26px);margin:0}
+.brand small{opacity:.88}
+.ledger{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.chip{background:#0c3d26;border:1px solid #73d497;border-radius:10px;padding:6px 9px;font-size:12px;font-weight:800}
+.chip.value{background:#104e45;border-color:#5eead4}
+.debt.danger{background:#7f1d1d;border-color:#fb7185}
+.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:9px 12px;background:#eaf7ef}
+.stage{border:2px solid #afd9bd;border-radius:12px;padding:8px;background:#fff;color:#174d2d;font-weight:900;cursor:pointer}
+.stage.active{background:#ffd75e;border-color:#e4a900}
+.stage small{display:block;font-weight:500;margin-top:3px}
+.workspace{position:relative;min-height:0;background:#d9eee1}
+.game{display:none;width:100%;height:100%;border:0;background:#fff}
+.game.active{display:block}
+.help{position:absolute;right:14px;bottom:14px;z-index:5;background:#10291be8;border:2px solid #ffd75e;border-radius:12px;padding:9px;font-size:12px;max-width:270px}
+.help button,.report-actions button{border:0;border-radius:7px;padding:7px;font-weight:800;cursor:pointer}
+.borrow-box{margin:7px 0;padding:7px;background:#ffffff18;border:1px solid #ffd75e;border-radius:8px}
+.borrow-box label{display:block;margin-bottom:5px;font-weight:800}
+.borrow-row{display:flex;gap:5px}
+.borrow-row input{width:88px;border:0;border-radius:6px;padding:7px;font-weight:800}
+.borrow-row button,.report-actions button{background:#ffd75e;color:#173d29}
+.report-panel{position:absolute;left:14px;bottom:14px;z-index:6;width:min(430px,calc(100% - 310px));background:#f8fafcee;color:#10291b;border:2px solid #10b981;border-radius:12px;padding:12px;box-shadow:0 14px 36px rgba(0,0,0,.22);font-size:12px}
+.report-panel h2{margin:0 0 8px;font-size:17px;color:#065f46}
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.report-card{background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:8px;min-height:55px}
+.report-card b{display:block;font-size:18px;color:#047857;margin-top:3px}
+.report-note{margin:8px 0 0;line-height:1.45;color:#334155}
+.report-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.value-guide{margin-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.value-guide section{background:#ffffff;border:1px solid #bbf7d0;border-radius:8px;padding:8px}
+.value-guide h3{margin:0 0 5px;font-size:12px;color:#065f46}
+.value-guide ul{margin:0;padding-left:16px;line-height:1.45}
+.value-guide li{margin:2px 0}
+.bankrupt{display:none;position:absolute;inset:0;z-index:20;background:#350b0bee;align-items:center;justify-content:center;text-align:center}
+.bankrupt.show{display:flex}
+.bankrupt>div{max-width:500px;padding:28px;border:3px solid #fb7185;border-radius:18px;background:#611313}
+.bankrupt button{padding:10px 18px;border:0;border-radius:8px;font-weight:900}
+@media(max-width:820px){.top{align-items:flex-start;flex-direction:column}.ledger{justify-content:flex-start}.nav{font-size:12px}.help{display:none}.report-panel{left:10px;right:10px;bottom:10px;width:auto}}
+</style>
+</head>
+<body>
+<main class="app">
+ <header class="top">
+  <div class="brand">
+   <h1>🌱 사회적경제 협동경영 통합앱</h1>
+   <small>지역 자원 발굴 → 사회적 가치 상품 제작 → 지역순환 배송 → 수익과 환원</small>
+  </div>
+  <div id="ledger" class="ledger"></div>
+ </header>
+ <nav class="nav">
+  <button class="stage active" data-stage="0">1. 지역 자원 발굴<small>상생버블로 재료 확보</small></button>
+  <button class="stage" data-stage="1">2. 가치 상품 제작<small>테트리스로 제품 생산</small></button>
+  <button class="stage" data-stage="2">3. 지역순환 배송<small>상생택배로 판매·수익</small></button>
+ </nav>
+ <section class="workspace">
+  <iframe class="game active" title="지역 자원 발굴" src="2인협동_상생버블_사회적기업건설_저장완성본.html"></iframe>
+  <iframe class="game" title="가치 상품 제작" src="서연재_사회적 가치실현.html"></iframe>
+  <iframe class="game" title="지역순환 배송" src="동행런_사회적가치_완성본.html"></iframe>
+
+  <div class="report-panel" id="report-panel">
+   <h2>지원센터 평가 리포트</h2>
+   <div class="report-grid" id="report-grid"></div>
+   <p class="report-note" id="report-note"></p>
+   <div class="value-guide">
+    <section>
+     <h3>사회적 가치 올리는 법</h3>
+      <ul>
+       <li>자원·생산·배송·환원을 고르게 올려야 합니다.</li>
+       <li>한 영역이 부족하면 총점 상한이 걸립니다.</li>
+       <li>재료는 세 종류가 균형 있게 남아야 인정됩니다.</li>
+       <li>환원은 지역 환원과 돌봄 재투자를 함께 해야 합니다.</li>
+      </ul>
+    </section>
+    <section>
+     <h3>기업으로 돌아오는 효과</h3>
+     <ul id="benefit-list"></ul>
+    </section>
+   </div>
+   <div class="report-actions">
+    <button onclick="refreshReport()">리포트 갱신</button>
+    <button onclick="applyReturn('community')">지역 환원 30%</button>
+    <button onclick="applyReturn('care')">돌봄 재투자 20%</button>
+   </div>
+  </div>
+
+  <div class="help">
+   <b>경영 도움말</b><br>수익만 높이는 것보다 부채 관리와 지역사회 환원 균형이 중요합니다.
+   <div class="borrow-box">
+    <label for="borrow-amount">💰 차입·상환 원금</label>
+    <div class="borrow-row">
+     <input id="borrow-amount" type="number" min="100" max="1000" step="100" value="100">
+     <button onclick="borrowFromBook()">차입</button>
+     <button onclick="repayFromBook()">상환</button>
+    </div>
+    <small>상환 시 원금에 10% 이자가 붙습니다.</small>
+   </div>
+   <button onclick="resetBook()">공통 장부 초기화</button>
+  </div>
+  <div id="bankrupt" class="bankrupt"><div><h2>기업 파산</h2><p>부채가 한도 1,200에 도달했습니다.<br>차입과 상환의 균형을 다시 설계해 보세요.</p><button onclick="resetBook()">새 경영 시작</button></div></div>
+ </section>
+</main>
+<script>
+const KEY='social_economy_pipeline_v1';
+const emptyBook=()=>({capital:0,material1:0,material2:0,material3:0,material1Multiplier:1,material2Multiplier:1,material3Multiplier:1,debt:0,products:{food:0,education:0,welfare:0,clothing:0,service:0,festival:0},revenue:0,bankrupt:false,loanStarted:false,returnFund:0,careFund:0,socialValue:0,socialProductionBonus:0,socialDeliveryBonus:0,socialDebtRelief:0});
+let book=loadBook();
+function loadBook(){try{const p=Object.assign(emptyBook(),JSON.parse(localStorage.getItem(KEY)||'{}'));p.products=Object.assign(emptyBook().products,p.products||{});return p}catch(e){return emptyBook()}}
+function saveBook(p){book=Object.assign(emptyBook(),p||{});book.products=Object.assign(emptyBook().products,book.products||{});applySocialBenefits();localStorage.setItem(KEY,JSON.stringify(book));render();syncAll()}
+function stockCount(){return Object.values(book.products).reduce((a,b)=>a+Number(b||0),0)}
+function socialBreakdown(){
+ const stock=stockCount();
+ const balancedMaterial=Math.min(Number(book.material1||0),Number(book.material2||0),Number(book.material3||0));
+ const resource=Math.min(20,Math.floor(balancedMaterial*2));
+ const production=Math.min(25,Math.floor(stock*2));
+ const distribution=Math.min(25,Math.floor((book.revenue||0)/45));
+ const communityReturn=Math.min(15,Math.floor((book.returnFund||0)/25));
+ const careReturn=Math.min(15,Math.floor((book.careFund||0)/25));
+ const returnScore=communityReturn+careReturn;
+ const pillars=[resource,production,distribution,returnScore];
+ const weakest=Math.min(...pillars);
+ let balanceCap=100;
+ if(weakest<5)balanceCap=40;
+ else if(weakest<10)balanceCap=60;
+ else if(weakest<15)balanceCap=80;
+ const debtPenalty=book.debt>=900?15:book.debt>=600?8:0;
+ const raw=Math.max(0,resource+production+distribution+returnScore-debtPenalty);
+ return {resource,production,distribution,returnScore,communityReturn,careReturn,debtPenalty,balanceCap,score:Math.min(100,balanceCap,raw),weakest};
+}
+function socialScore(){
+ return socialBreakdown().score;
+}
+function grade(score){return score>=85?'A':score>=70?'B':score>=55?'C':'보완 필요'}
+function applySocialBenefits(){
+ const score=socialScore();
+ book.socialValue=score;
+ book.socialProductionBonus=score>=30?1:0;
+ book.socialDeliveryBonus=score>=60 ? .1 : 0;
+ book.socialDebtRelief=score>=80?100:0;
+}
+function render(){
+ const stock=stockCount(),score=socialScore();
+ document.getElementById('ledger').innerHTML=`<span class="chip">💰 자본 ${Math.ceil(book.capital)}</span><span class="chip">🔴 재료1 ${Math.ceil(book.material1)}</span><span class="chip">🔵 재료2 ${Math.ceil(book.material2)}</span><span class="chip">🟢 재료3 ${Math.ceil(book.material3)}</span><span class="chip">🏭 제품 ${Math.ceil(stock)}</span><span class="chip">📈 수익 ${Math.ceil(book.revenue)}</span><span class="chip value">🤝 사회가치 ${score}</span><span class="chip debt ${book.debt>=900?'danger':''}">🏦 부채 ${Math.ceil(book.debt)}/1,200</span>`;
+ document.getElementById('bankrupt').classList.toggle('show',!!book.bankrupt||book.debt>=1200);
+ refreshReport();
+}
+function refreshReport(){
+  applySocialBenefits();
+  const stock=stockCount(),breakdown=socialBreakdown(),score=breakdown.score,effectiveDebt=Math.max(0,book.debt-(book.socialDebtRelief||0)),risk=effectiveDebt>=900?'높음':effectiveDebt>=600?'주의':'낮음';
+  document.getElementById('report-grid').innerHTML=[
+  ['사회적 가치 점수',`${score}점 · ${grade(score)}`],
+  ['균형 자원',`${breakdown.resource}/20점 · 재료별 최소 ${Math.floor(Math.min(book.material1,book.material2,book.material3))}개`],
+  ['제품 생산',`${breakdown.production}/25점 · 제품 ${Math.ceil(stock)}개`],
+  ['지역 배송',`${breakdown.distribution}/25점 · 수익 ${Math.ceil(book.revenue||0)}원`],
+  ['사회 환원',`${breakdown.returnScore}/30점 · 지역 ${breakdown.communityReturn}/15 · 돌봄 ${breakdown.careReturn}/15`],
+  ['부채 위험도',`${risk}${book.socialDebtRelief?' · 안정성 -100':''}`],
+  ['균형 상한',`${breakdown.balanceCap}점${breakdown.balanceCap<100?' · 부족 영역 보완 필요':''}`]
+  ].map(([k,v])=>`<div class="report-card">${k}<b>${v}</b></div>`).join('');
+  document.getElementById('report-note').textContent=breakdown.balanceCap<100?'사회적 가치는 한 영역만으로 완성되지 않습니다. 자원 확보, 제품 생산, 배송 수익, 지역·돌봄 환원을 균형 있게 맞추면 점수 상한이 열립니다.':'네 영역이 고르게 성장하고 있어 사회적경제의 선순환 구조가 잘 드러납니다.';
+ document.getElementById('benefit-list').innerHTML=[
+  `${score>=30?'✅':'⬜'} 30점: 생산량 +1`,
+  `${score>=60?'✅':'⬜'} 60점: 배송 수익 +10%`,
+  `${score>=80?'✅':'⬜'} 80점: 안정성 보너스`
+ ].map(v=>`<li>${v}</li>`).join('');
+}
+function applyReturn(type){
+ const rate=type==='community'?0.3:0.2;
+ const label=type==='community'?'지역사회 환원':'돌봄 서비스 재투자';
+ const amount=Math.floor((book.revenue||0)*rate);
+ if(amount<=0){alert('환원할 누적 수익이 아직 없습니다. 지역순환 배송으로 수익을 만든 뒤 다시 시도하세요.');return}
+ if(book.capital<amount){alert(`자본이 부족합니다. ${label}에는 ${amount}원이 필요합니다.`);return}
+ if(!confirm(`${label}으로 ${amount}원을 배분할까요?\n\n지원센터 평가 리포트의 사회적 가치 점수가 올라갑니다.`))return;
+ book.capital-=amount;
+ if(type==='community')book.returnFund=(book.returnFund||0)+amount;
+ else book.careFund=(book.careFund||0)+amount;
+ book.socialValue=socialScore();
+ saveBook(book);
+ alert(`${label} ${amount}원을 반영했습니다.`);
+}
+function sync(frame){try{frame.contentWindow.postMessage({type:'pipeline-sync',data:book},'*')}catch(e){}}
+function syncAll(){document.querySelectorAll('.game').forEach(sync)}
+window.addEventListener('message',e=>{if(e.data?.type==='pipeline-save')saveBook(e.data.data);if(e.data?.type==='reset-all-games'){localStorage.removeItem('yeongju_coop_bubble_save_v1');localStorage.removeItem('social_economy_tetris_reset_data');book=emptyBook();localStorage.setItem(KEY,JSON.stringify(book));render();gameFrames.forEach(frame=>{const src=frame.getAttribute('src');if(src)frame.setAttribute('src',src)})}});
+const stageButtons=[...document.querySelectorAll('.stage')],gameFrames=[...document.querySelectorAll('.game')];
+let activeStage=0;
+function transitionMessage(from,to){
+ const names=['지역 자원 발굴','가치 상품 제작','지역순환 배송'];
+ const reentry=['입장 자본금 200','제품 생산에 필요한 혼합 재료','배송할 제품 재고'];
+ return `${names[from]}을(를) 종료하고 ${names[to]}으로 넘어가시겠습니까?\n\n확인을 누르면 현재 게임은 종료됩니다. 다시 ${names[from]}을(를) 시작할 때 ${reentry[from]} 비용이 다시 발생합니다.`;
+}
+function endStage(index){const frame=gameFrames[index],src=frame.getAttribute('src');frame.classList.remove('active');if(src)frame.setAttribute('src',src)}
+function changeStage(nextStage){if(nextStage===activeStage)return;if((activeStage===0&&nextStage===1)||(activeStage===1&&nextStage===2)){if(!confirm(transitionMessage(activeStage,nextStage)))return}endStage(activeStage);activeStage=nextStage;stageButtons.forEach((button,i)=>button.classList.toggle('active',i===activeStage));gameFrames.forEach((frame,i)=>frame.classList.toggle('active',i===activeStage));sync(gameFrames[activeStage])}
+gameFrames.forEach(f=>f.addEventListener('load',()=>sync(f)));
+stageButtons.forEach((button,i)=>button.onclick=()=>changeStage(i));
+function borrowFromBook(){const input=document.getElementById('borrow-amount');let amount=Math.ceil(Number(input.value||0)/100)*100;if(!Number.isFinite(amount)||amount<100){alert('차입 금액을 100 이상 입력하세요.');return}amount=Math.min(1000,amount);if(book.bankrupt||book.debt>=1200){alert('이미 파산 상태라 차입할 수 없습니다.');return}if(book.debt+amount>=1200&&!confirm(`이 금액을 차입하면 부채가 ${book.debt+amount}이 되어 파산합니다. 그래도 차입할까요?`))return;book.capital+=amount;book.debt+=amount;book.loanStarted=true;if(book.debt>=1200)book.bankrupt=true;input.value=amount;saveBook(book);alert(`자본 ${amount}을 차입했습니다. 현재 부채는 ${book.debt}입니다.`)}
+function repayFromBook(){const input=document.getElementById('borrow-amount');let requested=Math.ceil(Number(input.value||0)/100)*100;if(!Number.isFinite(requested)||requested<100){alert('상환 원금을 100 이상 입력하세요.');return}if(book.debt<=0){alert('상환할 부채가 없습니다.');return}const principal=Math.min(requested,book.debt),interest=Math.ceil(principal*.1),payment=principal+interest;if(book.capital<payment){alert(`자본이 부족합니다. 원금 ${principal}과 이자 ${interest}을 합쳐 ${payment}이 필요합니다.`);return}book.capital-=payment;book.debt-=principal;saveBook(book);alert(`원금 ${principal}과 이자 ${interest}, 총 ${payment}을 상환했습니다. 남은 부채는 ${book.debt}입니다.`)}
+function resetBook(){if(confirm('자원·상품·수익·부채를 모두 초기화하고 새로 시작할까요?'))saveBook(emptyBook())}
+render();
+</script>
+</body>
+</html>
