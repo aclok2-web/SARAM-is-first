@@ -130,6 +130,9 @@
             box-sizing: border-box;
         }
         .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px}.impact-chip{padding:6px;border-radius:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35)}.impact-chip b{display:block;color:#4ade80;font-size:13px}.project-log{margin-top:7px;font-size:9px;line-height:1.45;color:#cbd5e1;max-height:75px;overflow:auto}.return-choices{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}.return-choices button{font-size:10px;padding:8px;background:#10b981;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer}
+        .mobile-tetris-controls{display:none;position:fixed;left:8px;right:8px;bottom:8px;z-index:80;grid-template-columns:1fr 1fr 1fr;gap:7px;background:rgba(2,6,23,.88);border:2px solid #10b981;border-radius:12px;padding:8px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+        .mobile-tetris-controls button{border:0;border-radius:10px;background:#1f9d66;color:#fff;font-weight:900;font-size:15px;padding:13px 4px}
+        .mobile-tetris-controls .wide{grid-column:span 3;background:#facc15;color:#17201b}
         .shop-info {
             display: flex;
             flex-direction: column;
@@ -261,7 +264,7 @@
             }
             canvas {
                 width: 100%;
-                height: 100%;
+                height: calc(100% - 112px);
             }
             #pipeline-ledger {
                 display: none !important;
@@ -271,6 +274,9 @@
             }
             .difficulty-btn {
                 width: min(260px, 88vw);
+            }
+            .mobile-tetris-controls {
+                display: grid;
             }
         }
     </style>
@@ -396,6 +402,13 @@
     <div class="tip">
         [↑] 회전 | [←][→] 이동 | [↓] 소프트 드롭 | [Space] 하드 드롭<br>
         <span style="color: #f43f5e; font-weight: bold;">💡 행복도 100% 도달 시:</span> 쌓아둔 자금을 사회에 <strong>전액 기부(보유기금 리셋)</strong>하여 진정한 가치 환원을 실현합니다!
+    </div>
+    <div class="mobile-tetris-controls">
+        <button id="touch-left">◀ 이동</button>
+        <button id="touch-rotate">회전</button>
+        <button id="touch-right">이동 ▶</button>
+        <button id="touch-down">내리기</button>
+        <button class="wide" id="touch-drop">즉시 낙하</button>
     </div>
 
 <script src="fox_character_model.js"></script>
@@ -1033,6 +1046,27 @@
         currentBlock.x = originalX;
     }
 
+    function moveHorizontal(dir) {
+        if (!isPlaying || !currentBlock.matrix) return;
+        if (!checkCollision(currentBlock.x + dir, currentBlock.y, currentBlock.matrix)) {
+            currentBlock.x += dir;
+            draw();
+        }
+    }
+
+    function hardDrop() {
+        if (!isPlaying || !currentBlock.matrix) return;
+        while (!checkCollision(currentBlock.x, currentBlock.y + 1, currentBlock.matrix)) {
+            currentBlock.y++;
+        }
+        lockBlock();
+        clearLines();
+        if (isPlaying) {
+            spawnBlock();
+        }
+        draw();
+    }
+
     function renderImpact(){
         const grid=document.getElementById('impact-grid'); if(!grid)return;
         const p=loadPipeline();
@@ -1117,29 +1151,38 @@
         }
 
         if (e.key === 'ArrowLeft') {
-            if (!checkCollision(currentBlock.x - 1, currentBlock.y, currentBlock.matrix)) {
-                currentBlock.x--;
-            }
+            moveHorizontal(-1);
         } else if (e.key === 'ArrowRight') {
-            if (!checkCollision(currentBlock.x + 1, currentBlock.y, currentBlock.matrix)) {
-                currentBlock.x++;
-            }
+            moveHorizontal(1);
         } else if (e.key === 'ArrowDown') {
             moveDown();
         } else if (e.key === 'ArrowUp') {
             rotateBlock();
         } else if (e.code === 'Space') {
-            while (!checkCollision(currentBlock.x, currentBlock.y + 1, currentBlock.matrix)) {
-                currentBlock.y++;
-            }
-            lockBlock();
-            clearLines();
-            if (isPlaying) {
-                spawnBlock();
-            }
+            hardDrop();
         }
         draw();
     });
+
+    function bindTouchButton(id, action, repeat=false) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        let timer = null;
+        const stop = () => { if (timer) clearInterval(timer); timer = null; };
+        btn.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            action();
+            if (repeat) timer = setInterval(action, 120);
+        });
+        btn.addEventListener('pointerup', stop);
+        btn.addEventListener('pointercancel', stop);
+        btn.addEventListener('pointerleave', stop);
+    }
+    bindTouchButton('touch-left', () => moveHorizontal(-1), true);
+    bindTouchButton('touch-right', () => moveHorizontal(1), true);
+    bindTouchButton('touch-rotate', () => { if (isPlaying) { rotateBlock(); draw(); } });
+    bindTouchButton('touch-down', () => moveDown(), true);
+    bindTouchButton('touch-drop', hardDrop);
 
     loadUserData();renderPipeline();
     initBoard();
