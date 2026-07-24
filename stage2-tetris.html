@@ -264,7 +264,8 @@
             }
             canvas {
                 width: 100%;
-                height: calc(100% - 112px);
+                height: 100%;
+                touch-action: none;
             }
             #pipeline-ledger {
                 display: none !important;
@@ -308,7 +309,7 @@
                 font-size: 12px;
             }
             body.playing .mobile-tetris-controls {
-                display: grid;
+                display: none;
             }
         }
     </style>
@@ -1219,6 +1220,74 @@
     bindTouchButton('touch-rotate', () => { if (isPlaying) { rotateBlock(); draw(); } });
     bindTouchButton('touch-down', () => moveDown(), true);
     bindTouchButton('touch-drop', hardDrop);
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchLastX = 0;
+    let touchLastY = 0;
+    let touchMoved = false;
+    let longPressTimer = null;
+
+    function clearLongPress() {
+        if (longPressTimer) clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+        if (!isPlaying) return;
+        e.preventDefault();
+        canvas.setPointerCapture?.(e.pointerId);
+        touchStartX = touchLastX = e.clientX;
+        touchStartY = touchLastY = e.clientY;
+        touchMoved = false;
+        clearLongPress();
+        longPressTimer = setTimeout(() => {
+            if (!touchMoved) hardDrop();
+        }, 430);
+    });
+
+    canvas.addEventListener('pointermove', e => {
+        if (!isPlaying) return;
+        e.preventDefault();
+        const dx = e.clientX - touchLastX;
+        const dy = e.clientY - touchLastY;
+        if (Math.abs(dx) >= 28) {
+            moveHorizontal(dx > 0 ? 1 : -1);
+            touchLastX = e.clientX;
+            touchMoved = true;
+            clearLongPress();
+        }
+        if (dy >= 34) {
+            moveDown();
+            touchLastY = e.clientY;
+            touchMoved = true;
+            clearLongPress();
+        }
+    });
+
+    canvas.addEventListener('pointerup', e => {
+        if (!isPlaying) return;
+        e.preventDefault();
+        clearLongPress();
+        const rect = canvas.getBoundingClientRect();
+        const dx = e.clientX - touchStartX;
+        const dy = e.clientY - touchStartY;
+        if (Math.abs(dx) > 24 || Math.abs(dy) > 24) return;
+        const xRatio = (e.clientX - rect.left) / rect.width;
+        const yRatio = (e.clientY - rect.top) / rect.height;
+        if (yRatio > 0.78) {
+            moveDown();
+        } else if (xRatio < 0.35) {
+            moveHorizontal(-1);
+        } else if (xRatio > 0.65) {
+            moveHorizontal(1);
+        } else {
+            rotateBlock();
+            draw();
+        }
+    });
+
+    canvas.addEventListener('pointercancel', clearLongPress);
 
     loadUserData();renderPipeline();
     initBoard();
