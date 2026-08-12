@@ -620,7 +620,13 @@
         updateDashboardValues();
     }
 
+    const VALUE_RECIPES={welfare:{material1:1,material2:1,material3:2},service:{material1:1,material2:2,material3:2},festival:{material1:2,material2:1,material3:2}};
+    function hasValueMaterials(product,amount=1){const pipeline=loadPipeline(),recipe=VALUE_RECIPES[product];return !!recipe&&Object.keys(recipe).every(key=>Number(pipeline[key]||0)>=recipe[key]*amount)}
+    function showMaterialShortage(){alert('재료가 없어서 사회적 가치 재료를 더 모아주세요.');}
+
     function selectDifficulty(gridCols, modeName, speed) {
+        const product=document.getElementById('manufacture-type').value;
+        if(!hasValueMaterials(product)){showMaterialShortage();return}
         if(!mandatoryLoan())return;
         difficultyScreen.style.display = 'none';
         
@@ -1154,12 +1160,12 @@
         if(!cleared)return;
         lines+=cleared;happiness=Math.min(100,happiness+cleared*10);
         const product=document.getElementById('manufacture-type').value;
-        const labels={welfare:'취약계층 지원',service:'우범지대 개선',festival:'지역경제 활성화'},recipes={welfare:{material1:1,material2:1,material3:2},service:{material1:1,material2:2,material3:2},festival:{material1:2,material2:1,material3:2}};
+        const labels={welfare:'취약계층 지원',service:'우범지대 개선',festival:'지역경제 활성화'};
         let pipeline=loadPipeline();
-        const recipe=recipes[product],upgradeType={welfare:'rotation',service:'rotation',festival:'multiplier'}[product],productionMultiplier=Math.pow(1.5,userData.upgrades[upgradeType]||0),socialBonus=Number(pipeline.socialProductionBonus||0),remaining=CATEGORY_GOAL-producedByCategory[product],produced=Math.min(remaining,Math.max(1,Math.floor((cleared+socialBonus)*productionMultiplier)));
-        if(produced<=0){infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건 · 다른 분야를 선택하세요`;renderImpact();return}
+        const recipe=VALUE_RECIPES[product],upgradeType={welfare:'rotation',service:'rotation',festival:'multiplier'}[product],productionMultiplier=Math.pow(1.5,userData.upgrades[upgradeType]||0),socialBonus=Number(pipeline.socialProductionBonus||0),remaining=CATEGORY_GOAL-producedByCategory[product],wanted=Math.min(remaining,Math.max(1,Math.floor((cleared+socialBonus)*productionMultiplier))),affordable=Math.min(...Object.keys(recipe).map(k=>Math.floor(Number(pipeline[k]||0)/recipe[k]))),produced=Math.min(wanted,affordable);
+        if(produced<=0){showMaterialShortage();isPlaying=false;if(animationId){cancelAnimationFrame(animationId);animationId=null}document.body.classList.remove('playing');showDifficultySelect();return}
         pipeline.products=Object.assign(pipelineDefault().products,pipeline.products||{});
-        Object.keys(recipe).forEach(k=>{const use=Math.min(Number(pipeline[k]||0),recipe[k]*cleared);pipeline[k]=Math.max(0,Number(pipeline[k]||0)-use)});
+        Object.keys(recipe).forEach(k=>{pipeline[k]=Math.max(0,Number(pipeline[k]||0)-recipe[k]*produced)});
         pipeline.products[product]=(pipeline.products[product]||0)+produced;producedByCategory[product]+=produced;producedThisRound+=produced;currentScore+=produced*100;savePipeline(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}건 제작 · 점수 +${(produced*100).toLocaleString()}점`);
         queueManufactureEffect(clearedRows, product, produced);
         infoScore.innerText=currentScore.toLocaleString()+'점';infoLines.innerText=lines+'개';infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건`;renderImpact();
