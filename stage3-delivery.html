@@ -702,9 +702,8 @@
     function handleCollision(obj) {
       if(obj.kind==='issue'){
         failureIssue=obj.data.item.issue;
-        cooperationGauge=Math.max(0,cooperationGauge-15);
-        slowdownTimer=Math.max(slowdownTimer,90);
-        createParticleEffect(`⚠️ ${failureIssue} 발견 · 골인 지점까지 계속 달리세요!`,'#ffcc80');
+        deliveryGoalReached=false;
+        finishGame(false);
         return;
       }
       if (obj.kind !== "delivery") return;
