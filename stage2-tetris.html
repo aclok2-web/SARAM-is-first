@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            background: radial-gradient(circle, #0f172a 0%, #020617 100%);
+            background:linear-gradient(rgba(2,6,23,.78),rgba(2,6,23,.88)),url("assets/social-economy-background.png") center/cover fixed no-repeat;
             color: #ffffff;
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
             display: flex;
@@ -18,33 +18,37 @@
             overflow: hidden;
         }
         h1 {
-            margin: 0 0 3px 0;
-            font-size: 24px;
+            margin: 0 0 2px 0;
+            font-size: 20px;
             color: #10b981;
             text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
             letter-spacing: 1px;
         }
         p.subtitle {
-            margin: 0 0 12px 0;
-            font-size: 13px;
+            margin: 0 0 6px 0;
+            font-size: 11px;
             color: #94a3b8;
             text-align: center;
             max-width: 580px;
             line-height: 1.4;
         }
         #arcade-cabinet {
-            display: flex;
+            display: grid;
+            grid-template-columns: 320px 210px;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 18px;
+            padding: 10px;
             border-radius: 20px;
             border: 4px solid #10b981;
             box-shadow: 0 0 25px rgba(16, 185, 129, 0.3), inset 0 0 15px rgba(255,255,255,0.05);
-            gap: 18px;
+            gap: 8px;
             position: relative;
         }
         #screen-area {
-            width: 320px;
-            height: 520px;
+            width: 100%;
+            height: min(520px, calc(100vh - 175px));
+            min-height: 360px;
+            grid-column: 1 / -1;
+            justify-self: center;
             position: relative;
             background: #090d16;
             border: 3px solid #334155;
@@ -54,6 +58,8 @@
         }
         canvas {
             display: block;
+            width: 100%;
+            height: 100%;
         }
         .screen-overlay {
             position: absolute;
@@ -114,6 +120,9 @@
             box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
             transform: translateY(-2px);
         }
+        #difficulty-screen .shop-item,
+        #difficulty-screen > .menu-title:first-child,
+        #difficulty-screen > div:nth-child(2) { display:none; }
         
         /* 다단계 무한 투자 상점 스타일 */
         .shop-item {
@@ -129,7 +138,8 @@
             text-align: left;
             box-sizing: border-box;
         }
-        .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px}.impact-chip{padding:6px;border-radius:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35)}.impact-chip b{display:block;color:#4ade80;font-size:13px}.project-log{margin-top:7px;font-size:9px;line-height:1.45;color:#cbd5e1;max-height:75px;overflow:auto}.return-choices{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}.return-choices button{font-size:10px;padding:8px;background:#10b981;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer}
+        .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px}.impact-chip{padding:6px;border-radius:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35)}.impact-chip b{display:block;color:#4ade80;font-size:13px}.return-choices{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}.return-choices button{font-size:10px;padding:8px;background:#10b981;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer}
+        #production-status{grid-column:1 / -1;margin:0;padding:8px 10px;text-align:left;border-width:2px}.production-title{color:#4ade80;font-size:15px;font-weight:900;margin-bottom:4px}.production-controls{display:grid;grid-template-columns:200px 1fr;gap:8px;align-items:center}#production-status .manufacture-label{font-size:11px;margin:0}#production-status .manufacture-select{padding:7px 6px;font-size:12px;margin-top:3px}#production-status .impact-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;font-size:10px}#production-status .impact-chip{padding:6px 4px;text-align:center}#production-status .impact-chip b{font-size:13px;margin-top:2px}
         .mobile-tetris-controls{display:none;position:fixed;left:8px;right:8px;bottom:8px;z-index:80;grid-template-columns:1fr 1fr 1fr;gap:6px;background:rgba(2,6,23,.88);border:2px solid #10b981;border-radius:12px;padding:7px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
         .mobile-tetris-controls button{border:0;border-radius:10px;background:#1f9d66;color:#fff;font-weight:900;font-size:14px;padding:10px 4px}
         .mobile-tetris-controls .wide{grid-column:span 3;background:#facc15;color:#17201b}
@@ -171,7 +181,7 @@
         }
 
         #side-panel {
-            width: 170px;
+            width: 210px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -197,6 +207,24 @@
             font-weight: bold;
             color: #facc15;
             word-break: keep-all;
+        }
+        .manufacture-select {
+            width: 100%;
+            margin-top: 7px;
+            padding: 11px 8px;
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 900;
+        }
+        .manufacture-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 900;
+            color: #dcfce7;
+            margin: 6px 0 10px;
         }
         #reset-btn {
             width: 100%;
@@ -252,6 +280,8 @@
                 box-shadow: none;
                 background: #020617;
             }
+            #production-status{position:absolute;top:6px;left:6px;right:6px;z-index:9;padding:7px 8px;background:rgba(15,23,42,.94)}
+            .production-title{font-size:14px;margin-bottom:4px}.production-controls{grid-template-columns:1fr;gap:4px}#production-status .impact-grid{display:none}.manufacture-label{font-size:11px;margin:0}.manufacture-select{padding:7px;font-size:12px}
             #screen-area {
                 width: 100vw;
                 height: 100vh;
@@ -317,25 +347,37 @@
 <body>
 
     <h1>🌱 가치 순환: 사회적 경제 테트리스 (사회 환원판)</h1>
-    <p class="subtitle">공동체 행복도 100%를 달성하면, 보유한 모든 기금을 사회에 전액 기부(리셋)하고 다음 세대를 위한 도전을 시작합니다!</p>
+    <p class="subtitle">세 가지 사회적 가치 분야를 각각 5건씩 제작하면 목표를 달성합니다.</p>
 
     <div id="arcade-cabinet">
+        <div id="production-status" class="glass-box">
+            <div class="production-title">사회적 가치 제작 현황</div>
+            <div class="production-controls">
+                <label class="manufacture-label">사회적 가치 종류
+                    <select id="manufacture-type" class="manufacture-select">
+                        <option value="welfare">🫶 취약계층 지원 (재료 1·1·2)</option>
+                        <option value="service">💡 우범지대 개선 (재료 1·2·2)</option>
+                        <option value="festival">🏪 지역경제 활성화 (재료 2·1·2)</option>
+                    </select>
+                </label>
+                <div id="impact-grid" class="impact-grid">
+                    <div class="impact-chip">🫶 취약계층 지원<b>0 / 5건</b></div>
+                    <div class="impact-chip">💡 우범지대 개선<b>0 / 5건</b></div>
+                    <div class="impact-chip">🏪 지역경제 활성화<b>0 / 5건</b></div>
+                </div>
+            </div>
+        </div>
         <div id="screen-area">
             <!-- 1. 시작 인트로 화면 -->
             <div id="start-screen" class="screen-overlay">
                 <h2 style="color: #10b981; margin-bottom: 5px; font-size: 22px; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);">사회적 가치 실현</h2>
-                <p style="color: #64748b; font-size: 11px; margin-top: 0; margin-bottom: 30px;">행복도 100% 달성 시 기금 기부 및 리셋</p>
+                <p style="color: #64748b; font-size: 11px; margin-top: 0; margin-bottom: 30px;">사회적 가치 재료를 모아 사회적 가치를 창출하세요</p>
                 
-                <div class="glass-box" style="width: 220px; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); margin-bottom: 10px;">
-                    <div class="box-title" style="color: #10b981;">보유 중인 사회적 기금</div>
-                    <div id="start-accumulated-fund" class="box-value" style="color: #10b981; font-size: 16px;">0원</div>
-                </div>
-
-                <div class="pulse-text" onclick="showDifficultySelect()">경영 계획 및 투자하기</div>
+                <div class="pulse-text" onclick="showDifficultySelect()">사회적 가치 만들기</div>
             </div>
 
             <!-- 2. 다단계 무한 투자 상점 및 난이도 선택 화면 -->
-            <div id="difficulty-screen" class="screen-overlay" style="display: none; justify-content: flex-start; overflow-y: auto; padding-top: 15px;">
+            <div id="difficulty-screen" class="screen-overlay" style="display: none;">
                 <div class="menu-title" style="font-size: 15px; margin-bottom: 2px;">🏛️ 생산 투자센터</div>
                 <div style="font-size: 10px; color: #a8a29e; margin-bottom: 8px;">공통장부 자본: <span id="shop-available-fund" style="color: #facc15; font-weight: bold;">0원</span></div>
                 
@@ -367,7 +409,7 @@
                     <button class="buy-btn" onclick="buyInfiniteUpgrade('multiplier')">투자</button>
                 </div>
 
-                <div class="menu-title" style="font-size: 14px; margin-top: 15px; margin-bottom: 5px;">🎯 경영 비즈니스 개시</div>
+                <div class="menu-title" style="font-size: 20px; margin-bottom: 14px;">✨ 사회적 가치 생성</div>
                 <button class="difficulty-btn" onclick="selectDifficulty(8, '마을공동체 (하)', 1000)">하: 마을공동체 (8칸)</button>
                 <button class="difficulty-btn" onclick="selectDifficulty(10, '사회적기업 (중)', 700)">중: 사회적기업 (10칸)</button>
                 <button class="difficulty-btn" onclick="selectDifficulty(12, '사회적협동조합 (상)', 450)">상: 사회적협동조합 (12칸)</button>
@@ -376,16 +418,16 @@
             <!-- 3. 게임 오버 / 행복 환원 성공 화면 -->
             <div id="gameover-screen" class="screen-overlay" style="display: none;">
                 <h2 id="gameover-title" style="color: #ef4444; text-shadow: 0 0 10px #ef4444; margin-bottom: 5px;">임무 종료</h2>
-                <p id="gameover-desc" style="color: #94a3b8; font-size: 11px; margin-bottom: 15px;">이번 회차 사회적 기금을 성공적으로 적립했습니다.</p>
+                <p id="gameover-desc" style="color: #94a3b8; font-size: 11px; margin-bottom: 15px;">이번 회차 사회적 가치 제작 결과입니다.</p>
                 
                 <div class="glass-box" style="width: 220px; margin-bottom: 10px;">
-                    <div class="box-title" id="final-score-title">이번 분기 창출 기금</div>
-                    <div id="final-score" class="box-value" style="color: #facc15;">0원</div>
+                    <div class="box-title" id="final-score-title">최종 점수</div>
+                    <div id="final-score" class="box-value" style="color: #facc15;">0점</div>
                 </div>
 
                 <div class="glass-box" style="width: 220px; margin-bottom: 25px; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
-                    <div class="box-title" style="color: #10b981;">이월 누적 사회적 기금</div>
-                    <div id="final-accumulated" class="box-value" style="color: #10b981;">0원</div>
+                    <div class="box-title" style="color: #10b981;">제작한 사회적 가치</div>
+                    <div id="final-accumulated" class="box-value" style="color: #10b981;">0 / 15건</div>
                 </div>
 
                 <button class="difficulty-btn" style="background: #3b82f6; border: none;" onclick="showDifficultySelect()">새 투자 및 재활동</button>
@@ -395,46 +437,11 @@
             <canvas id="tetris" width="320" height="520"></canvas>
         </div>
 
-        <!-- 우측 정보 보드 -->
-        <div id="side-panel">
-            <div class="glass-box" style="border-color:#10b981">
-                <div class="box-title" style="color:#4ade80">상품 제작 현황</div>
-                <label style="display:block;font-size:10px;margin:6px 0">생산할 물건
-                    <select id="manufacture-type" style="width:100%;margin-top:4px;padding:5px;border-radius:5px">
-                        <option value="food">🍎 지역 식품 (재료 2·1·1)</option><option value="education">🏫 교육 체험 (재료 1·2·1)</option>
-                        <option value="welfare">🩷 돌봄 복지 (재료 1·1·2)</option><option value="clothing">👕 친환경 의류 (재료 2·2·1)</option>
-                        <option value="service">🛠 생활 서비스 (재료 1·2·2)</option><option value="festival">🎉 축제 기획 (재료 2·1·2)</option>
-                    </select>
-                </label>
-                <div id="impact-grid" class="impact-grid"></div>
-                <div id="project-log" class="project-log">아직 생산된 상품이 없습니다.</div>
-            </div>
-            <div>
-                <div class="glass-box">
-                    <div class="box-title">누적 보유 기금</div>
-                    <div id="info-accumulated" class="box-value" style="color: #10b981;">0원</div>
-                </div>
-                <div class="glass-box" style="border-color: #f43f5e; background: rgba(244, 63, 94, 0.05);">
-                    <div class="box-title" style="color: #f43f5e; font-weight: bold;">공동체 행복도</div>
-                    <div id="info-happy" class="box-value" style="color: #f43f5e; font-size: 18px;">0%</div>
-                </div>
-                <div class="glass-box">
-                    <div class="box-title">실시간 기금 창출</div>
-                    <div id="info-score" class="box-value">0원</div>
-                </div>
-                <div class="glass-box">
-                    <div class="box-title">완성한 생산 라인</div>
-                    <div id="info-lines" class="box-value" style="color: #4ade80;">0개</div>
-                </div>
-            </div>
-
-            <button id="reset-btn" onclick="backToMain()">메인 화면으로</button>
-        </div>
     </div>
 
     <div class="tip">
         [↑] 회전 | [←][→] 이동 | [↓] 소프트 드롭 | [Space] 하드 드롭<br>
-        <span style="color: #f43f5e; font-weight: bold;">💡 행복도 100% 도달 시:</span> 쌓아둔 자금을 사회에 <strong>전액 기부(보유기금 리셋)</strong>하여 진정한 가치 환원을 실현합니다!
+        <span style="color: #4ade80; font-weight: bold;">💡 분야별 목표:</span> 취약계층 지원·우범지대 개선·지역경제 활성화를 각각 5건씩 제작하세요.
     </div>
     <div class="mobile-tetris-controls">
         <button id="touch-left">◀ 이동</button>
@@ -455,7 +462,7 @@
     function borrowPipeline(){let p=loadPipeline();p.debt+=100;p.capital+=100;if(p.debt>=DEBT_LIMIT){p.bankrupt=true;isPlaying=false;alert('부채 1,200 도달: 파산했습니다.')}savePipeline(p)}
     function repayPipeline(){let p=loadPipeline();if(p.debt<=0)return alert('상환할 부채가 없습니다.');let principal=Math.min(100,p.debt),interest=Math.ceil(principal*.1),payment=principal+interest;if(p.capital<payment)return alert(`원금 ${principal}과 이자 ${interest}, 총 ${payment}의 자본이 필요합니다.`);p.capital-=payment;p.debt-=principal;savePipeline(p);alert(`원금 ${principal} + 이자 ${interest}을 상환했습니다.`)}
     function resetPipeline(){if(confirm('공통 경영장부를 초기화할까요?')){localStorage.removeItem(PIPELINE_KEY);location.reload()}}
-    function renderPipeline(){let p=loadPipeline(),el=document.getElementById('pipeline-ledger');if(!el){el=document.createElement('div');el.id='pipeline-ledger';el.style.cssText='position:fixed;right:12px;top:12px;z-index:50;background:#07131eee;color:#fff;border:2px solid #10b981;border-radius:10px;padding:9px;font-size:11px;line-height:1.5';document.body.appendChild(el)}let stock=Object.values(p.products).reduce((a,b)=>a+b,0);el.innerHTML=`<b>혼합 생산 장부</b><br>🔴 재료1 ${Math.ceil(p.material1)} · 🔵 재료2 ${Math.ceil(p.material2)} · 🟢 재료3 ${Math.ceil(p.material3)}<br>생산 제품 ${Math.ceil(stock)} · 자본 ${Math.ceil(p.capital)}<br>부채 <span style="color:${p.debt>=900?'#fb7185':'#facc15'}">${Math.ceil(p.debt)}/${DEBT_LIMIT}</span><br><button onclick="borrowPipeline()">+100 차입</button> <button onclick="repayPipeline()">100 상환</button>`}
+    function renderPipeline(){const el=document.getElementById('pipeline-ledger');if(el)el.remove()}
     const canvas = document.getElementById('tetris');
     const ctx = canvas.getContext('2d');
     
@@ -463,15 +470,16 @@
     const difficultyScreen = document.getElementById('difficulty-screen');
     const gameoverScreen = document.getElementById('gameover-screen');
     
-    const startAccumulatedText = document.getElementById('start-accumulated-fund');
+    const startAccumulatedText = document.getElementById('start-accumulated-fund') || {innerText:''};
     const shopAvailableText = document.getElementById('shop-available-fund');
     const finalScoreText = document.getElementById('final-score');
     const finalAccumulatedText = document.getElementById('final-accumulated');
     
-    const infoAccumulated = document.getElementById('info-accumulated');
-    const infoScore = document.getElementById('info-score');
-    const infoLines = document.getElementById('info-lines');
-    const infoHappy = document.getElementById('info-happy');
+    const infoAccumulated = document.getElementById('info-accumulated') || {innerText:''};
+    const infoScore = document.getElementById('info-score') || {innerText:''};
+    const infoLines = document.getElementById('info-lines') || {innerText:''};
+    const infoProducts = document.getElementById('info-products') || {innerText:''};
+    const infoHappy = document.getElementById('info-happy') || {innerText:''};
 
     const lvSpeedText = document.getElementById('lv-speed');
     const lvRotationText = document.getElementById('lv-rotation');
@@ -488,6 +496,11 @@
     let board = [];
     let currentScore = 0;
     let lines = 0;
+    const CATEGORY_GOAL = 5;
+    const PRODUCT_GOAL = 15;
+    let producedThisRound = 0;
+    let producedByCategory = {welfare:0,service:0,festival:0};
+    let productionGoalReached = false;
     let happiness = 0;
     let impact = {environment:0,work:0,inclusion:0,local:0,care:0,recycle:0,trust:0};
     let completedProjects = [];
@@ -650,12 +663,16 @@
     function resetGameData() {
         currentScore = 0;
         lines = 0;
+        producedThisRound = 0;
+        producedByCategory = {welfare:0,service:0,festival:0};
+        productionGoalReached = false;
         happiness = 0;
         impact = {environment:0,work:0,inclusion:0,local:0,care:0,recycle:0,trust:0};
         completedProjects = [];
         manufactureEffects = [];
         infoScore.innerText = '0원';
         infoLines.innerText = '0개';
+        infoProducts.innerText = `0 / ${PRODUCT_GOAL}건`;
         infoHappy.innerText = '0%';
         renderImpact();
         initBoard();
@@ -1106,21 +1123,15 @@
 
     function renderImpact(){
         const grid=document.getElementById('impact-grid'); if(!grid)return;
-        const p=loadPipeline();
-        const products=Object.assign(pipelineDefault().products,p.products||{});
         const productLabels={
-            food:{icon:'🍎',name:'지역 식품'},
-            education:{icon:'🏫',name:'교육 체험'},
-            welfare:{icon:'🩷',name:'돌봄 복지'},
-            clothing:{icon:'👕',name:'친환경 의류'},
-            service:{icon:'🛠',name:'생활 서비스'},
-            festival:{icon:'🎉',name:'축제 기획'}
+            welfare:{icon:'🫶',name:'취약계층 지원'},
+            service:{icon:'💡',name:'우범지대 개선'},
+            festival:{icon:'🏪',name:'지역경제 활성화'}
         };
         grid.innerHTML=Object.keys(productLabels).map(key=>{
-            const item=productLabels[key],qty=Math.ceil(Number(products[key]||0));
-            return `<div class="impact-chip">${item.icon} ${item.name}<b>${qty}개</b></div>`;
+            const item=productLabels[key],qty=producedByCategory[key]||0,done=qty>=CATEGORY_GOAL;
+            return `<div class="impact-chip" style="${done?'border-color:#facc15;background:rgba(250,204,21,.16)':''}">${item.icon} ${item.name}<b>${qty} / ${CATEGORY_GOAL}건 ${done?'✓':''}</b></div>`;
         }).join('');
-        document.getElementById('project-log').innerHTML=completedProjects.length?completedProjects.slice(-5).reverse().map(p=>'✅ '+p).join('<br>'):'아직 생산된 상품이 없습니다.';
     }
     function checkValueProjects(counts){
         const made=[];
@@ -1143,15 +1154,16 @@
         if(!cleared)return;
         lines+=cleared;happiness=Math.min(100,happiness+cleared*10);
         const product=document.getElementById('manufacture-type').value;
-        const labels={food:'지역 식품',education:'교육 체험',welfare:'돌봄 복지',clothing:'친환경 의류',service:'생활 서비스',festival:'축제 기획'},recipes={food:{material1:2,material2:1,material3:1},education:{material1:1,material2:2,material3:1},welfare:{material1:1,material2:1,material3:2},clothing:{material1:2,material2:2,material3:1},service:{material1:1,material2:2,material3:2},festival:{material1:2,material2:1,material3:2}};
+        const labels={welfare:'취약계층 지원',service:'우범지대 개선',festival:'지역경제 활성화'},recipes={welfare:{material1:1,material2:1,material3:2},service:{material1:1,material2:2,material3:2},festival:{material1:2,material2:1,material3:2}};
         let pipeline=loadPipeline();
-        const recipe=recipes[product],upgradeType={food:'speed',clothing:'speed',welfare:'rotation',service:'rotation',education:'multiplier',festival:'multiplier'}[product],productionMultiplier=Math.pow(1.5,userData.upgrades[upgradeType]||0),socialBonus=Number(pipeline.socialProductionBonus||0),produced=(cleared+socialBonus)*productionMultiplier;
+        const recipe=recipes[product],upgradeType={welfare:'rotation',service:'rotation',festival:'multiplier'}[product],productionMultiplier=Math.pow(1.5,userData.upgrades[upgradeType]||0),socialBonus=Number(pipeline.socialProductionBonus||0),remaining=CATEGORY_GOAL-producedByCategory[product],produced=Math.min(remaining,Math.max(1,Math.floor((cleared+socialBonus)*productionMultiplier)));
+        if(produced<=0){infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건 · 다른 분야를 선택하세요`;renderImpact();return}
         pipeline.products=Object.assign(pipelineDefault().products,pipeline.products||{});
         Object.keys(recipe).forEach(k=>{const use=Math.min(Number(pipeline[k]||0),recipe[k]*cleared);pipeline[k]=Math.max(0,Number(pipeline[k]||0)-use)});
-        pipeline.products[product]=(pipeline.products[product]||0)+produced;currentScore+=produced*20;savePipeline(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}개 제작 · 생산 라인 ${cleared}줄 · 제작 기금 +${(produced*20).toLocaleString()}원 · 생산 배율 ×${productionMultiplier.toFixed(2)}`);
+        pipeline.products[product]=(pipeline.products[product]||0)+produced;producedByCategory[product]+=produced;producedThisRound+=produced;currentScore+=produced*100;savePipeline(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}건 제작 · 점수 +${(produced*100).toLocaleString()}점`);
         queueManufactureEffect(clearedRows, product, produced);
-        infoScore.innerText=currentScore.toLocaleString()+'원';infoLines.innerText=lines+'개';infoHappy.innerText=happiness+'%';renderImpact();
-        if(happiness>=100)setTimeout(triggerGameOver,300);
+        infoScore.innerText=currentScore.toLocaleString()+'점';infoLines.innerText=lines+'개';infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건`;renderImpact();
+        if(Object.values(producedByCategory).every(count=>count>=CATEGORY_GOAL)){productionGoalReached=true;setTimeout(triggerGameOver,300)}
     };
     function completeReturn(area){
         const labels={environment:'환경과 자원순환',care:'돌봄과 포용',work:'공정 일자리',local:'지역경제'};
@@ -1170,13 +1182,14 @@
         if(!isPlaying&&gameoverScreen.style.display==='flex')return;
         isPlaying=false;document.body.classList.remove('playing');if(animationId){cancelAnimationFrame(animationId);animationId=null}
         const title=document.getElementById('gameover-title'),desc=document.getElementById('gameover-desc');
-        title.innerText='어디에 가치를 환원할까요?';title.style.color='#10b981';
-        desc.innerText='라인에서 만든 사회적 가치와 기금을 실제 사회문제 해결 분야에 배분하세요.';
-        document.getElementById('final-score-title').innerText='환원 가능한 총 기금';
-        finalScoreText.innerText=(userData.accumulatedFund+currentScore).toLocaleString()+'원';
-        finalAccumulatedText.innerText=userData.accumulatedFund.toLocaleString()+'원';
-        let choices=document.getElementById('return-choices');if(!choices){choices=document.createElement('div');choices.id='return-choices';choices.className='return-choices';choices.innerHTML='<button onclick="completeReturn(\'environment\')">🌱 환경</button><button onclick="completeReturn(\'care\')">🩷 돌봄</button><button onclick="completeReturn(\'work\')">🤝 일자리</button><button onclick="completeReturn(\'local\')">🍊 지역경제</button>';desc.after(choices)}
-        const restart=gameoverScreen.querySelector('button.difficulty-btn');if(restart)restart.style.display='none';
+        title.innerText=productionGoalReached?'🎉 제작 목표 달성':'게임 종료';title.style.color=productionGoalReached?'#10b981':'#ef4444';
+        desc.innerText=productionGoalReached?'세 가지 사회적 가치 목표를 각각 5건씩 모두 달성했습니다.':`사회적 가치 ${producedThisRound}건을 만들고 게임을 마쳤습니다.`;
+        document.getElementById('final-score-title').innerText='최종 점수';
+        finalScoreText.innerText=currentScore.toLocaleString()+'점';
+        finalAccumulatedText.previousElementSibling.innerText='제작한 사회적 가치';
+        finalAccumulatedText.innerText=producedThisRound+' / '+PRODUCT_GOAL+'건';
+        const choices=document.getElementById('return-choices');if(choices)choices.remove();
+        const restart=gameoverScreen.querySelector('button.difficulty-btn');if(restart)restart.style.display='block';
         gameoverScreen.style.display='flex';
     };
 
@@ -1289,7 +1302,7 @@
 
     canvas.addEventListener('pointercancel', clearLongPress);
 
-    loadUserData();renderPipeline();
+    loadUserData();renderPipeline();renderImpact();
     initBoard();
     draw();
 </script>

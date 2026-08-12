@@ -208,7 +208,7 @@ canvas.addEventListener('pointermove',e=>{if(!touchAiming||e.pointerType==='mous
 canvas.addEventListener('pointerup',e=>{if(!touchAiming||e.pointerType==='mouse')return;aimAtCanvasPoint(e.clientX,e.clientY);touchAiming=false;fire();e.preventDefault();},{passive:false});
 canvas.addEventListener('pointercancel',()=>{touchAiming=false});
 function loop(){update();draw();requestAnimationFrame(loop)}
-const startInfo=document.querySelector('#start p');if(startInfo)startInfo.innerHTML='일반 버블 슈터처럼 같은 색 버블 3개 이상을 연결해 제거하세요.<br>발사 횟수 제한과 정답 순서는 없습니다. 제거 실패가 5번 누적되면 새 줄이 내려옵니다.<br>A/D 또는 방향키 조준 · Enter/Space 발사';blankState();initGrid();spawn();updateUI();renderPipeline();loop();
+const startInfo=document.querySelector('#start p');if(startInfo)startInfo.innerHTML='모두가 행복한 지속가능한 지역사회를 만들기 위해 사회적 가치를 버블을 통해 모아주세요!<br><br>같은 색 버블을 3개 이상 연결하면 사회적 가치를 모을 수 있어요.<br>A/D 또는 방향키로 조준하고 Enter/Space로 발사하세요.';blankState();initGrid();spawn();updateUI();renderPipeline();loop();
 </script>
 </body>
 </html>
