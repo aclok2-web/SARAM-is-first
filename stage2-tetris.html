@@ -1168,7 +1168,6 @@
         pipeline.products=Object.assign(pipelineDefault().products,pipeline.products||{});
         Object.keys(recipe).forEach(k=>{pipeline[k]=Math.max(0,Number(pipeline[k]||0)-recipe[k]*produced)});
         pipeline.products[product]=(pipeline.products[product]||0)+produced;producedByCategory[product]+=produced;producedThisRound+=produced;currentScore+=produced*100;savePipeline(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}건 창출 · 연대·협력·상생 재료 사용`);
-        queueManufactureEffect(clearedRows, product, produced);
         infoScore.innerText=currentScore.toLocaleString()+'점';infoLines.innerText=lines+'개';infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건`;renderImpact();
         if(Object.values(producedByCategory).every(count=>count>=CATEGORY_GOAL)){productionGoalReached=true;setTimeout(triggerGameOver,300)}
     };
