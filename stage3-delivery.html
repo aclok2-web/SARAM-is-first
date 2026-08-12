@@ -702,8 +702,9 @@
     function handleCollision(obj) {
       if(obj.kind==='issue'){
         failureIssue=obj.data.item.issue;
-        deliveryGoalReached=false;
-        finishGame(false);
+        cooperationGauge=Math.max(0,cooperationGauge-15);
+        slowdownTimer=Math.max(slowdownTimer,90);
+        createParticleEffect(`⚠️ ${failureIssue} 발견 · 골인 지점까지 계속 달리세요!`,'#ffcc80');
         return;
       }
       if (obj.kind !== "delivery") return;
@@ -714,8 +715,7 @@
         createParticleEffect(`💝 ${obj.data.place} 전달 완료! +${gained}`,obj.color);
         if(deliveryCount>=DELIVERY_CATEGORIES[selectedDeliveryCategory].items.length){
           deliveryGoalReached=true;
-          finishGame(true);
-          return;
+          createParticleEffect('✅ 지원정책 전달 완료 · 지속가능한 지역사회 골인 지점까지 달리세요!','#81c784');
         }
       }
     }
