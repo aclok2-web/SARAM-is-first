@@ -139,6 +139,23 @@ function transitionMessage(from,to){
 }
 function endStage(index){const frame=gameFrames[index],src=frame.getAttribute('src');frame.classList.remove('active');if(src)frame.setAttribute('src',src)}
 function changeStage(nextStage){if(nextStage===activeStage)return;if((activeStage===0&&nextStage===1)||(activeStage===1&&nextStage===2)){if(!confirm(transitionMessage(activeStage,nextStage)))return}endStage(activeStage);activeStage=nextStage;stageButtons.forEach((button,i)=>button.classList.toggle('active',i===activeStage));gameFrames.forEach((frame,i)=>frame.classList.toggle('active',i===activeStage));sync(gameFrames[activeStage])}
+function advanceCompletedStage(fromStage,nextStage){
+ if(activeStage!==fromStage||nextStage<0||nextStage>=gameFrames.length)return;
+ if(fromStage===0&&nextStage===1){
+  book.material1=Math.max(50,Number(book.material1||0));
+  book.material2=Math.max(50,Number(book.material2||0));
+  book.material3=Math.max(50,Number(book.material3||0));
+  localStorage.setItem(KEY,JSON.stringify(book));
+  render();
+ }
+ endStage(activeStage);
+ activeStage=nextStage;
+ stageButtons.forEach((button,i)=>button.classList.toggle('active',i===activeStage));
+ gameFrames.forEach((frame,i)=>frame.classList.toggle('active',i===activeStage));
+ sync(gameFrames[activeStage]);
+ setTimeout(()=>sync(gameFrames[activeStage]),150);
+}
+window.addEventListener('message',e=>{if(e.data?.type==='stage-complete')advanceCompletedStage(Number(e.data.stage),Number(e.data.nextStage))});
 gameFrames.forEach(f=>f.addEventListener('load',()=>sync(f)));
 stageButtons.forEach((button,i)=>button.onclick=()=>changeStage(i));
 function resetBook(){if(confirm('연대·협력·상생과 세 분야의 만든 가치를 모두 초기화하고 새로 시작할까요?'))saveBook(emptyBook())}
