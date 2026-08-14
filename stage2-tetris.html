@@ -454,10 +454,10 @@
 <script src="fox_character_model.js"></script>
 <script>
     const PIPELINE_KEY='social_economy_pipeline_v1',DEBT_LIMIT=1200;
-    function pipelineDefault(){return{capital:0,material1:0,material2:0,material3:0,material1Multiplier:1,material2Multiplier:1,material3Multiplier:1,debt:0,products:{food:0,education:0,welfare:0,clothing:0,service:0,festival:0},revenue:0,bankrupt:false,loanStarted:false}}
+    function pipelineDefault(){return{capital:0,material1:0,material2:0,material3:0,material1Multiplier:1,material2Multiplier:1,material3Multiplier:1,debt:0,products:{food:0,education:0,welfare:0,clothing:0,service:0,festival:0},productionProgress:{welfare:0,service:0,festival:0},revenue:0,bankrupt:false,loanStarted:false}}
     function loadPipeline(){try{let p=Object.assign(pipelineDefault(),JSON.parse(localStorage.getItem(PIPELINE_KEY)||'{}'));p.products=Object.assign(pipelineDefault().products,p.products||{});return p}catch(e){return pipelineDefault()}}
     function savePipeline(p){localStorage.setItem(PIPELINE_KEY,JSON.stringify(p));if(parent!==window)parent.postMessage({type:'pipeline-save',data:p},'*');renderPipeline()}
-    window.addEventListener('message',e=>{if(e.data?.type==='pipeline-sync'){localStorage.setItem(PIPELINE_KEY,JSON.stringify(e.data.data));renderPipeline()}});
+    window.addEventListener('message',e=>{if(e.data?.type==='pipeline-sync'){localStorage.setItem(PIPELINE_KEY,JSON.stringify(e.data.data));loadProductionProgress();renderPipeline();renderImpact()}});
     function mandatoryLoan(){let p=loadPipeline();if(p.bankrupt){alert('부채 한도 초과로 파산 상태입니다.');return false}if(p.loanStarted)return true;if(!confirm('생산을 시작하려면 창업자금 300을 의무적으로 차입해야 합니다. 실행할까요?'))return false;p.loanStarted=true;p.debt=300;p.capital=300;savePipeline(p);return true}
     function borrowPipeline(){let p=loadPipeline();p.debt+=100;p.capital+=100;if(p.debt>=DEBT_LIMIT){p.bankrupt=true;isPlaying=false;alert('부채 1,200 도달: 파산했습니다.')}savePipeline(p)}
     function repayPipeline(){let p=loadPipeline();if(p.debt<=0)return alert('상환할 부채가 없습니다.');let principal=Math.min(100,p.debt),interest=Math.ceil(principal*.1),payment=principal+interest;if(p.capital<payment)return alert(`원금 ${principal}과 이자 ${interest}, 총 ${payment}의 자본이 필요합니다.`);p.capital-=payment;p.debt-=principal;savePipeline(p);alert(`원금 ${principal} + 이자 ${interest}을 상환했습니다.`)}
@@ -622,10 +622,44 @@
 
     const VALUE_RECIPES={welfare:{material1:1,material2:1,material3:2},service:{material1:1,material2:2,material3:2},festival:{material1:2,material2:1,material3:2}};
     const MATERIAL_NAMES={material1:'연대',material2:'협력',material3:'상생'};
+    const PRODUCT_ORDER=['welfare','service','festival'];
+    function loadProductionProgress(){
+        const pipeline=loadPipeline(),saved=pipeline.productionProgress||{};
+        const source=PRODUCT_ORDER.some(key=>Number(saved[key]||0)>0)?saved:(pipeline.products||{});
+        PRODUCT_ORDER.forEach(key=>producedByCategory[key]=Math.min(CATEGORY_GOAL,Math.max(0,Math.floor(Number(source[key]||0)))));
+        producedThisRound=PRODUCT_ORDER.reduce((sum,key)=>sum+producedByCategory[key],0);
+        productionGoalReached=PRODUCT_ORDER.every(key=>producedByCategory[key]>=CATEGORY_GOAL);
+    }
+    function saveProductionProgress(pipeline=loadPipeline()){
+        pipeline.productionProgress={};
+        PRODUCT_ORDER.forEach(key=>pipeline.productionProgress[key]=Math.min(CATEGORY_GOAL,producedByCategory[key]||0));
+        savePipeline(pipeline);
+    }
+    function nextIncompleteProduct(){return PRODUCT_ORDER.find(key=>(producedByCategory[key]||0)<CATEGORY_GOAL)||null}
+    function updateProductAvailability(){
+        const select=document.getElementById('manufacture-type');
+        [...select.options].forEach(option=>{
+            if(!option.dataset.baseLabel)option.dataset.baseLabel=option.textContent;
+            const done=(producedByCategory[option.value]||0)>=CATEGORY_GOAL;
+            option.disabled=done;
+            option.textContent=option.dataset.baseLabel+(done?' · 5/5 완료':'');
+        });
+        if((producedByCategory[select.value]||0)>=CATEGORY_GOAL){const next=nextIncompleteProduct();if(next)select.value=next}
+        select.disabled=productionGoalReached;
+    }
+    function announceProduction(text){
+        const title=document.querySelector('.production-title');
+        if(!title)return;
+        title.textContent=text;
+        clearTimeout(announceProduction.timer);
+        announceProduction.timer=setTimeout(()=>title.textContent='사회적 가치 제작 현황',2200);
+    }
     function hasValueMaterials(product,amount=1){const pipeline=loadPipeline(),recipe=VALUE_RECIPES[product];return !!recipe&&Object.keys(recipe).every(key=>Number(pipeline[key]||0)>=recipe[key]*amount)}
     function showMaterialShortage(product){const pipeline=loadPipeline(),recipe=VALUE_RECIPES[product],missing=Object.keys(recipe).filter(key=>Number(pipeline[key]||0)<recipe[key]).map(key=>`${MATERIAL_NAMES[key]} ${recipe[key]}개 필요 (현재 ${Math.floor(Number(pipeline[key]||0))}개)`);alert(`재료가 없어서 사회적 가치 재료를 더 모아주세요.${missing.length?'\n\n부족한 재료: '+missing.join(' · '):''}`);}
 
     function selectDifficulty(gridCols, modeName, speed) {
+        loadProductionProgress();renderImpact();
+        if(productionGoalReached){triggerGameOver();return}
         const product=document.getElementById('manufacture-type').value;
         if(!hasValueMaterials(product)){showMaterialShortage(product);return}
         if(!mandatoryLoan())return;
@@ -670,16 +704,14 @@
     function resetGameData() {
         currentScore = 0;
         lines = 0;
-        producedThisRound = 0;
-        producedByCategory = {welfare:0,service:0,festival:0};
-        productionGoalReached = false;
+        loadProductionProgress();
         happiness = 0;
         impact = {environment:0,work:0,inclusion:0,local:0,care:0,recycle:0,trust:0};
         completedProjects = [];
         manufactureEffects = [];
         infoScore.innerText = '0원';
         infoLines.innerText = '0개';
-        infoProducts.innerText = `0 / ${PRODUCT_GOAL}건`;
+        infoProducts.innerText = `${producedThisRound} / ${PRODUCT_GOAL}건`;
         infoHappy.innerText = '0%';
         renderImpact();
         initBoard();
@@ -1139,6 +1171,7 @@
             const item=productLabels[key],qty=producedByCategory[key]||0,done=qty>=CATEGORY_GOAL;
             return `<div class="impact-chip" style="${done?'border-color:#facc15;background:rgba(250,204,21,.16)':''}">${item.icon} ${item.name}<b>${qty} / ${CATEGORY_GOAL}건 ${done?'✓':''}</b></div>`;
         }).join('');
+        updateProductAvailability();
     }
     function checkValueProjects(counts){
         const made=[];
@@ -1167,9 +1200,10 @@
         if(produced<=0){showMaterialShortage(product);isPlaying=false;if(animationId){cancelAnimationFrame(animationId);animationId=null}document.body.classList.remove('playing');showDifficultySelect();return}
         pipeline.products=Object.assign(pipelineDefault().products,pipeline.products||{});
         Object.keys(recipe).forEach(k=>{pipeline[k]=Math.max(0,Number(pipeline[k]||0)-recipe[k]*produced)});
-        pipeline.products[product]=(pipeline.products[product]||0)+produced;producedByCategory[product]+=produced;producedThisRound+=produced;currentScore+=produced*100;savePipeline(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}건 창출 · 연대·협력·상생 재료 사용`);
+        pipeline.products[product]=(pipeline.products[product]||0)+produced;producedByCategory[product]=Math.min(CATEGORY_GOAL,producedByCategory[product]+produced);producedThisRound=PRODUCT_ORDER.reduce((sum,key)=>sum+producedByCategory[key],0);currentScore+=produced*100;saveProductionProgress(pipeline);completedProjects.push(`${labels[product]} ${produced.toLocaleString()}건 창출 · 연대·협력·상생 재료 사용`);
         infoScore.innerText=currentScore.toLocaleString()+'점';infoLines.innerText=lines+'개';infoProducts.innerText=`${producedThisRound} / ${PRODUCT_GOAL}건`;renderImpact();
-        if(Object.values(producedByCategory).every(count=>count>=CATEGORY_GOAL)){productionGoalReached=true;setTimeout(triggerGameOver,300)}
+        if(PRODUCT_ORDER.every(key=>producedByCategory[key]>=CATEGORY_GOAL)){productionGoalReached=true;renderImpact();setTimeout(triggerGameOver,300)}
+        else if(producedByCategory[product]>=CATEGORY_GOAL){const next=nextIncompleteProduct();announceProduction(`${labels[product]} 5/5 완료! ${labels[next]} 제작으로 이동`)}
     };
     function completeReturn(area){
         const labels={environment:'환경과 자원순환',care:'돌봄과 포용',work:'공정 일자리',local:'지역경제'};
@@ -1308,7 +1342,7 @@
 
     canvas.addEventListener('pointercancel', clearLongPress);
 
-    loadUserData();renderPipeline();renderImpact();
+    loadUserData();loadProductionProgress();renderPipeline();renderImpact();
     initBoard();
     draw();
 </script>
